@@ -34,6 +34,7 @@ truth = testSamp[, 58]
 # With 2000 trees, training takes longer, but the variance estimates are much better
 rf.spam = randomForest(X, factor(Y), keep.inbag = TRUE, ntree = 2000)
 ij.spam = randomForestInfJack(rf.spam, X, calibrate = TRUE)
+plot(ij.spam)
 
 spam.cpred = predict(rf.spam, newData, type="class")
 cm = as.matrix(table(observed=truth, predicted=spam.cpred))
@@ -93,8 +94,17 @@ shuffleX = shuffleDeck[, 1:57]
 shuffleY = shuffleDeck[, 58]
 
 # With 2000 trees, training takes longer, but the variance estimates are much better
-rf.spam2 = randomForest(shuffleX, factor(shuffleY), keep.inbag = TRUE, ntree = 2000)
+rf.spam2 = randomForest(shuffleX, factor(shuffleY), keep.inbag = TRUE, ntree = 2000, mtry=19)
 ij.spam2 = randomForestInfJack(rf.spam2, shuffleX, calibrate = TRUE)
+plot(ij.spam2)
+
+# With 2000 trees, training takes longer, but the variance estimates are much better
+rf.spam3 = randomForest(randomIndependent, factor(randomDependent), keep.inbag = TRUE, ntree = 2000)
+ij.spam3 = randomForestInfJack(rf.spam3, randomIndependent, calibrate = TRUE)
+plot(ij.spam3)
+
+spam.cpred = predict(rf.spam2, newData, type="class")
+#cm = as.matrix(table(observed=truth, predicted=spam.cpred))
 
 quantiles2 = quantile(ij.spam2[,2],probs=quantileRange)
 
@@ -103,12 +113,12 @@ accuracies2 <- rep(0,19)
 
 getAccuracyOnThreshold <- function(x){
 
-  conRows = which(ij.spam[,2] < quantiles[x])
+  conRows = which(ij.spam2[,2] < quantiles2[x])
   X1 = shuffleDeck[conRows, 1:57]
   Y1 = shuffleDeck[conRows, 58]
 
   # With 2000 trees, training takes longer, but the variance estimates are much better
-  rf.spam.test = randomForest(X1, factor(Y1), keep.inbag = TRUE, ntree = 2000)
+  rf.spam.test = randomForest(X1, factor(Y1), keep.inbag = TRUE, ntree = 2000, mtry=19)
 
   spam.cpred = predict(rf.spam.test, newData, type="class")
   cm = as.matrix(table(observed=truth, predicted=spam.cpred))
